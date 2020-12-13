@@ -4,6 +4,7 @@ from sites.walmart import Walmart
 from sites.bestbuy import BestBuy
 from sites.target import Target
 from sites.gamestop import GameStop
+from sites.newegg import NewEgg
 from pages.createdialog import CreateDialog
 from pages.pollbrowser import PollBrowserDialog
 from utils import get_profile, get_proxy, BirdLogger, return_data, write_data
@@ -56,14 +57,19 @@ class HomePage(QtWidgets.QWidget):
         self.product_table_header.setGeometry(QtCore.QRect(240, 7, 61, 31))
         self.product_table_header.setFont(font)
         self.product_table_header.setStyleSheet("color: rgb(234, 239, 239);border: none;")
-        self.product_table_header.setText("Product")
+        self.product_table_header.setText("Link")
+        self.type_table_header = QtWidgets.QLabel(self.tasks_card)
+        self.type_table_header.setGeometry(QtCore.QRect(590, 7, 61, 31))
+        self.type_table_header.setFont(font)
+        self.type_table_header.setStyleSheet("color: rgb(234, 239, 239);border: none;")
+        self.type_table_header.setText("Type")
         self.profile_table_header = QtWidgets.QLabel(self.tasks_card)
-        self.profile_table_header.setGeometry(QtCore.QRect(590, 7, 61, 31))
+        self.profile_table_header.setGeometry(QtCore.QRect(650, 7, 61, 31))
         self.profile_table_header.setFont(font)
         self.profile_table_header.setStyleSheet("color: rgb(234, 239, 239);border: none;")
         self.profile_table_header.setText("Profile")
         self.status_table_header = QtWidgets.QLabel(self.tasks_card)
-        self.status_table_header.setGeometry(QtCore.QRect(650, 7, 61, 31))
+        self.status_table_header.setGeometry(QtCore.QRect(710, 7, 61, 31))
         self.status_table_header.setFont(font)
         self.status_table_header.setStyleSheet("color: rgb(234, 239, 239);border: none;")
         self.status_table_header.setText("Status")
@@ -248,13 +254,12 @@ class TaskTab(QtWidgets.QWidget):
         write_data("./data/tasks.json",tasks_data)
     def setupUi(self,TaskTab):
         self.running = False
-
         self.TaskTab = TaskTab
         self.TaskTab.setMinimumSize(QtCore.QSize(0, 50))
         self.TaskTab.setMaximumSize(QtCore.QSize(16777215, 50))
         self.TaskTab.setStyleSheet("border-radius: none;")
         self.product_label = QtWidgets.QLabel(self.TaskTab)
-        self.product_label.setGeometry(QtCore.QRect(222, 10, 331, 31))
+        self.product_label.setGeometry(QtCore.QRect(222, 10, 250, 31))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(13) if platform.system() == "Darwin" else font.setPointSize(13*.75)
@@ -263,11 +268,11 @@ class TaskTab(QtWidgets.QWidget):
         self.product_label.setFont(font)
         self.product_label.setStyleSheet("color: rgb(234, 239, 239);")
         self.profile_label = QtWidgets.QLabel(self.TaskTab)
-        self.profile_label.setGeometry(QtCore.QRect(571, 10, 51, 31))
+        self.profile_label.setGeometry(QtCore.QRect(650, 10, 51, 31))
         self.profile_label.setFont(font)
         self.profile_label.setStyleSheet("color: rgb(234, 239, 239);")
         self.status_label = QtWidgets.QLabel(self.TaskTab)
-        self.status_label.setGeometry(QtCore.QRect(632, 10, 231, 31))
+        self.status_label.setGeometry(QtCore.QRect(710, 10, 231, 31))
         self.status_label.setFont(font)
         self.status_label.setStyleSheet("color: rgb(234, 239, 239);")
         self.browser_label = QtWidgets.QLabel(self.TaskTab)
@@ -486,6 +491,7 @@ class TaskTab(QtWidgets.QWidget):
             self.browser_cookies
         )
         self.browser_thread.start()
+
 class TaskThread(QtCore.QThread):
     status_signal = QtCore.pyqtSignal("PyQt_PyObject")
     image_signal = QtCore.pyqtSignal("PyQt_PyObject")
@@ -507,11 +513,14 @@ class TaskThread(QtCore.QThread):
         if self.site == "Walmart":
             Walmart(self.task_id,self.status_signal, self.image_signal,  self.wait_poll_signal, self.wait_condition, self.product, profile, proxy, self.monitor_delay, self.error_delay, self.max_price)
         elif self.site == "Bestbuy":
-            BestBuy(self.status_signal, self.image_signal, self.product, profile, proxy, self.monitor_delay, self.error_delay) #TODO: Readd Discord Webhook
+            BestBuy(self.task_id, self.status_signal, self.image_signal, self.product, profile, proxy, self.monitor_delay, self.error_delay) #TODO: Readd Discord Webhook
         elif self.site == "Target":
             Target(self.task_id, self.status_signal, self.image_signal, self.product, profile, proxy, self.monitor_delay, self.error_delay)
         elif self.site == "GameStop":
             GameStop(self.task_id, self.status_signal, self.image_signal, self.product, profile, proxy, self.monitor_delay, self.error_delay, self.max_price)
+        elif self.site == "Newegg":
+            NewEgg(self.task_id, self.status_signal, self.image_signal, self.product, profile, proxy, self.monitor_delay, self.error_delay)
+
 
     def stop(self):
         self.terminate()

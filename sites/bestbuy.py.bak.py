@@ -12,7 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from utils.json_utils import find_values
 from utils.selenium_utils import enable_headless
 from utils import create_msg, send_webhook
-from discord_webhook import DiscordWebhook
+
 
 try:
     from Crypto.PublicKey import RSA
@@ -30,7 +30,6 @@ BEST_BUY_CART_URL = "https://api.bestbuy.com/click/5592e2b895800000/{sku}/cart"
 
 BEST_BUY_ADD_TO_CART_API_URL = "https://www.bestbuy.com/cart/api/v1/addToCart"
 BEST_BUY_CHECKOUT_URL = "https://www.bestbuy.com/checkout/c/orders/{order_id}/"
-WEBHOOK_URL = "https://discordapp.com/api/webhooks/778423506294931478/rFcPl55WCL_y-ucIpEBekQ08xoXJhVw5GjqkoXZLPvP3PwRbTCc9y7mhdGHH6dmS-IxO"
 
 DEFAULT_HEADERS = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -51,14 +50,13 @@ options.add_argument("user-data-dir=.profile-bb")
 
 class BestBuy:
 
-    def __init__(self, task_id, status_signal, image_signal, product, profile, proxy, monitor_delay, error_delay):
-        self.task_id, self.status_signal, self.image_signal, self.product, self.profile, self.monitor_delay, self.error_delay = task_id, status_signal, image_signal, product, profile, float(monitor_delay), float(error_delay)
+    def __init__(self, status_signal, image_signal, product, profile, proxy, monitor_delay, error_delay):
+        self.status_signal, self.image_signal, self.product, self.profile, self.monitor_delay, self.error_delay = status_signal, image_signal, product, profile, float(monitor_delay), float(error_delay)
         self.sku_id = parse.parse_qs(parse.urlparse(self.product).query)['skuId'][0]
         self.session = requests.Session()
         # TODO: Refactor Bird Bot Auto Checkout Functionality. For now, it will just open the cart link.
         self.auto_buy = False
         self.browser = self.init_driver()
-        self.product_image = None 
         starting_msg = "Starting Best Buy Task"
         if settings.dont_buy:
             starting_msg = "Starting Best Buy Task in dev mode - Phoenix Bot will not actually checkout. Check Settings page to disable Dev Mode"
@@ -163,7 +161,6 @@ class BestBuy:
             self.auto_checkout()
         else:
             cart_url = self.add_to_cart()
-
             self.status_signal.emit(create_msg(f"SKU: {self.sku_id} in stock: {cart_url}", "normal"))
             sleep(5)
 
@@ -202,7 +199,6 @@ class BestBuy:
 
     def add_to_cart(self):
         webbrowser.open_new(BEST_BUY_CART_URL.format(sku=self.sku_id))
-        send_webhook("B", "Bestbuy", self.profile["profile_name"], self.task_id, self.product_image)
         return BEST_BUY_CART_URL.format(sku=self.sku_id)
 
     def auto_checkout(self):
@@ -280,7 +276,6 @@ class BestBuy:
             sleep(5)
 
     # TODO: Refactor Bird Bot Auto Checkout Functionality. For now, it will just open the cart link.
-
     def get_tas_data(self):
         headers = {
             "accept": "*/*",
@@ -358,3 +353,15 @@ class BestBuy:
             "user-agent": settings.userAgent,
             "x-user-interface": "DotCom-Optimized",
         }
+        r = self.session.patch(
+            "https://www.bestbuy.com/checkout/d/orders/{}/".format(self.order_id),
+            json=body,
+            headers=headers,
+        )
+        [
+            self.status_signal.emit(create_msg(f"{{\"name\": {c.name}, \"value\": {c.value}, \"domain\": {c.domain}, \"path\": {c.path}}}", "normal"))
+            for c in self.session.cookies
+        ]
+
+        self.status_signal.emit(create_msg(f"{r.status_code}", "normal"))
+        self.status_signal.emit(create_msg(f"{r.text}", "normal"))

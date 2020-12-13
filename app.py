@@ -6,9 +6,10 @@ from pages.profilespage import ProfilesPage
 from pages.proxiespage import ProxiesPage
 from pages.settingspage import SettingsPage
 from pages.pollbrowser import PollBrowserDialog
+from pages.searchpage import SearchPage
 import sys, os, settings
 from theming.styles import globalStyles
-
+import discord_webhook
 
 def no_abort(a, b, c):
     sys.__excepthook__(a, b, c)
@@ -28,7 +29,7 @@ class MainWindow(QtWidgets.QMainWindow):
         MainWindow.setFixedSize(1109, 600)
         # background color for main UI
         MainWindow.setStyleSheet("background-color: {};".format(globalStyles["backgroundDark"]))
-        MainWindow.setWindowTitle("Phoenix Bot")
+        MainWindow.setWindowTitle("Auto Bot")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setStyleSheet("QMessageBox QLabel { color: #FFFFFF; }QMessageBox QPushButton { background-color: %s;color: #FFFFFF;}" % (globalStyles["primary"]) )
         self.sidebar = QtWidgets.QWidget(self.centralwidget)
@@ -91,6 +92,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings_icon.setStyleSheet("border: none;")
         self.settings_icon.setPixmap(QtGui.QPixmap("images/settings.png"))
         self.settings_icon.setScaledContents(True)
+        self.search_tab = QtWidgets.QWidget(self.sidebar)
+        self.search_tab.setGeometry(QtCore.QRect(0, 265, 60, 45))
+        self.search_tab.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.search_tab.setStyleSheet("background-color: transparent;border: none;")
+        self.search_active_tab = QtWidgets.QWidget(self.search_tab)
+        self.search_active_tab.setGeometry(QtCore.QRect(0, 0, 4, 45))
+        self.search_active_tab.setStyleSheet("background-color: transparent;border: none;")
+        self.search_icon = QtWidgets.QLabel(self.search_tab)
+        self.search_icon.setGeometry(QtCore.QRect(21, 13, 20, 20))
+        self.search_icon.setStyleSheet("border: none;")
+        self.search_icon.setPixmap(QtGui.QPixmap("images/birdbot.png"))
+        self.search_icon.setScaledContents(True)
         self.logo = QtWidgets.QLabel(self.sidebar)
         self.logo.setGeometry(QtCore.QRect(10, 23, 41, 41))
         self.logo.setStyleSheet("border: none;color:red;")
@@ -108,6 +121,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.proxiespage.hide()
         self.settingspage = SettingsPage(self.centralwidget)
         self.settingspage.hide()
+        self.searchpage = SearchPage(self.centralwidget)
+        self.searchpage.hide()
         MainWindow.setCentralWidget(self.centralwidget)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.set_functions()
@@ -118,6 +133,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.profiles_tab.mousePressEvent = lambda event: self.change_page(event, "profiles")
         self.proxies_tab.mousePressEvent = lambda event: self.change_page(event, "proxies")
         self.settings_tab.mousePressEvent = lambda event: self.change_page(event, "settings")
+        self.search_tab.mousePressEvent = lambda event: self.change_page(event, "search")
         self.homepage.newtask_btn.clicked.connect(self.createdialog.show)
     def change_page(self,event,current_page):
         eval('self.{}_active_tab.setStyleSheet("background-color: transparent;border: none;")'.format(self.current_page))

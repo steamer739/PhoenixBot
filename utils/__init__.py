@@ -122,7 +122,8 @@ def format_proxy(proxy):
 
 def send_webhook(webhook_type, site, profile, task_id, image_url):
     if settings.webhook != "":
-        webhook = DiscordWebhook(url=settings.webhook, username="Phoenix Bot",
+        print("Here in send_webhook")
+        webhook = DiscordWebhook(url=settings.webhook, username="Auto Bot",
                                  avatar_url="https://i.imgur.com/60G42xE.png")
         if webhook_type == "OP":
             if not settings.webhook_on_order:
@@ -131,12 +132,12 @@ def send_webhook(webhook_type, site, profile, task_id, image_url):
         elif webhook_type == "B":
             if not settings.webhook_on_browser:
                 return
-            embed = DiscordEmbed(title="Complete Order in Browser", color=0xf2a689)
+            embed = DiscordEmbed(title="Added to cart, complete order in browser", color=0xf2a689)
         elif webhook_type == "PF":
             if not settings.webhook_on_failed:
                 return
             embed = DiscordEmbed(title="Payment Failed", color=0xfc5151)
-        embed.set_footer(text="Via Phoenix Bot", icon_url="https://i.imgur.com/60G42xE.png")
+        embed.set_footer(text="Rashed - Auto Bot", icon_url="https://i.imgur.com/60G42xE.png")
         embed.add_embed_field(name="Site", value=site, inline=True)
         embed.add_embed_field(name="Profile", value=profile, inline=True)
         embed.add_embed_field(name="Task ID", value=task_id, inline=True)
@@ -144,7 +145,8 @@ def send_webhook(webhook_type, site, profile, task_id, image_url):
         webhook.add_embed(embed)
         try:
             webhook.execute()
-        except:
+        except Exception as e:
+            print(e)
             pass
 
 def random_delay(delay, start, stop):

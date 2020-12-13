@@ -46,6 +46,16 @@ class SettingsPage(QtWidgets.QWidget):
         edit.setAttribute(QtCore.Qt.WA_MacShowFocusRect, 0)
         return edit
 
+    def create_password(self, parent, rect, font, placeholder) -> QtWidgets.QLineEdit:
+        password = QtWidgets.QLineEdit(parent)
+        password.setGeometry(rect)
+        password.setStyleSheet("outline: 0;border: 1px solid #5D43FB;border-width: 0 0 2px;color: rgb(234, 239, 239);")
+        password.setFont(font)
+        password.setPlaceholderText(placeholder)
+        password.setAttribute(QtCore.Qt.WA_MacShowFocusRect, 0)
+        password.setEchoMode(QtWidgets.QLineEdit.Password)
+        return password
+        
     def setupUi(self, settingspage):
         self.settingspage = settingspage
         self.settingspage.setAttribute(QtCore.Qt.WA_StyledBackground, True)
@@ -87,7 +97,7 @@ class SettingsPage(QtWidgets.QWidget):
                                                  self.create_font("Arial", 22), "Settings")
         self.bestbuy_user_edit = self.create_edit(self.settings_card, QtCore.QRect(300, 310, 235, 20),
                                                  self.small_font, "Bestbuy.com Username (Email)")
-        self.bestbuy_pass_edit = self.create_edit(self.settings_card, QtCore.QRect(300, 335, 235, 20),
+        self.bestbuy_pass_edit = self.create_password(self.settings_card, QtCore.QRect(300, 335, 235, 20),
                                                  self.small_font, "Bestbuy.com Password")
         self.target_user_edit = self.create_edit(self.settings_card, QtCore.QRect(30, 365, 235, 20),
                                                  self.small_font, "Target.com Username (Email/Cell #)")
